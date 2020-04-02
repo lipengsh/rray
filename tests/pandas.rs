@@ -14,7 +14,7 @@ struct Row {
 }
 
 #[test]
-fn groupby() -> Result<(), Box<dyn Error>> {
+fn read_csv() -> Result<(), Box<dyn Error>> {
     let start = Instant::now();
 
     // read csv file
@@ -30,5 +30,10 @@ fn groupby() -> Result<(), Box<dyn Error>> {
     }
 
     println!("time elapse:{}", start.elapsed().as_seconds_f32());
+    Ok(())
+}
+
+#[test]
+fn csv_2vec() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
