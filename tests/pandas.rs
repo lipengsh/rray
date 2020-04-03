@@ -133,3 +133,30 @@ fn test_map_axis() {
     // assert_eq!(result.shape(), &[3, 4]);
     // itertools::assert_equal(result.iter().cloned().sorted(), 1..=3 * 4);
 }
+
+#[test]
+fn enumerate() {
+    use itertools::enumerate;
+    use itertools::Itertools;
+    use ndarray::Array;
+
+    let mut  data = vec![0, 0, 0, 1, 1, 0, 0, 1, 1, 2, 2];
+    data.sort_by(|a, b| Ord::cmp(&a,&b));
+    for (ch1, sub) in &data.into_iter().group_by(|&x| x) {
+        for ch2 in sub {
+            println!("{}", ch2);
+            assert_eq!(ch1, ch2);
+        }
+        println!("one group");
+    }
+
+
+    // for (ch1, sub) in &"ABABBCACC".chars().group_by(|&x| x) {
+    //     for ch2 in sub {
+    //         println!("{}", ch2);
+    //         assert_eq!(ch1, ch2);
+    //     }
+    //     println!("one group");
+    // }
+}
+
