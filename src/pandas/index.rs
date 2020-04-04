@@ -1,5 +1,13 @@
 /// index and multi-index
 
-pub struct Index {
+pub trait Index{
 
 }
+
+
+pub struct HashIndex {
+
+}
+
+
+

@@ -10,4 +10,5 @@ pub use groupby::Groupby;
 pub use series::Series;
 pub use dataframe::Dataframe;
 pub use columns::Columns;
+pub use index::Index;
 
