@@ -10,6 +10,6 @@ pub struct Dataframe {
     /// index trait
     /// box is a pointer to value in heap, pointer is in stack
     /// dyn trait(Index) is dynamic dispatch for polymorphism situation
-    /// because trait has impl ,trait is dynamics on
+    /// because trait has impl ,trait is dynamic
     index: Option<Box<dyn Index>>,
 }
