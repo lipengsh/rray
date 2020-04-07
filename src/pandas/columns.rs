@@ -1,6 +1,7 @@
 /// columns's struct
+use arrow::datatypes::DataType;
 
 pub struct Columns {
     name: String,
-    ctype: String,
+    column_type: DataType,
 }

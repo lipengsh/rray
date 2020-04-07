@@ -1,14 +1,10 @@
-mod groupby;
-mod prod;
-mod series;
-mod dataframe;
-mod dtypes;
 mod columns;
+mod dataframe;
+mod groupby;
 mod index;
+mod prod;
 
-pub use groupby::Groupby;
-pub use series::Series;
-pub use dataframe::Dataframe;
 pub use columns::Columns;
+pub use dataframe::Dataframe;
+pub use groupby::Groupby;
 pub use index::Index;
-
