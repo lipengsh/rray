@@ -59,9 +59,7 @@ fn ahaser() {
     hasher.write_u8(9);
     hasher.write(b"Huh?");
 
-    let mut v = vec![5, 1, 8, 22, 0, 44];
-
-    println!("Hash is {:x}!", hasher.finish());
+    // let mut v = vec![5, 1, 8, 22, 0, 44];
 
     println!("Hash is {:x}!", hasher.finish());
 }
@@ -92,7 +90,7 @@ fn chunks() {
 
     // random string vec
     let mut rand_string: Vec<String> = Vec::new();
-    for i in 0..32 {
+    for i in 0..12800 {
         let rand_index = rng.gen_range(5, 30);
         let s: String = thread_rng()
             .sample_iter(&Alphanumeric)
@@ -101,7 +99,7 @@ fn chunks() {
         rand_string.push(s);
     }
 
-    // println!("rand string: {:?}", rand_string);
+    println!("rand string: {:?}", rand_string.len());
 
     //chunks, step 16
     let size = 10;
@@ -113,13 +111,42 @@ fn chunks() {
     use ahash::AHasher;
     use rayon::prelude::*;
 
-    let mut rand_u8 = [0u8; 128];
-    rand::thread_rng().fill(&mut rand_u8);
+    let mut rand_array = [0u64; 12800];
+    rand::thread_rng().fill(&mut rand_array[..]);
 
-    let result = rand_u8.par_iter().map(|&i| {
-        let mut hasher = AHasher::default();
-        hasher.write_u8(i)
-    });
-    println!("hasher result:{:?}", result);
-    todo!("hasher par");
+    // let result: Vec<_> = rand_array
+    //     .into_par_iter()
+    //     .map(|&i| {
+    //         let mut hasher = AHasher::default();
+    //         hasher.write_u64(i);
+    //         hasher.finish()
+    //     })
+    //     .collect();
+
+    // let result: Vec<_> = rand_array
+    //     .into_par_iter()
+    //     .map_init(
+    //         || AHasher::default(),
+    //         |h, x| {
+    //             h.write_u64(*x);
+    //             h.finish()
+    //         },
+    //     )
+    //     .collect();
+
+    let result: Vec<_> = (rand_array.to_vec(), &rand_string)
+        .into_par_iter()
+        .map_init(
+            || AHasher::default(),
+            |h, (x, s)| {
+                h.write_u64(x);
+                h.write(s.as_bytes());
+                h.finish()
+            },
+        )
+        .collect();
+
+    println!("hasher result:{:?}", &result[0..10]);
+
+    //
 }
