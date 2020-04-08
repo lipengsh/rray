@@ -94,8 +94,3 @@ macro_rules! gen_hash {
         }
     };
 }
-
-#[test]
-fn bench_hash() {
-    gen(1024 * 1000);
-}
