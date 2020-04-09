@@ -1,6 +1,7 @@
+#[warn(unused_variables)]
 /// index and multi-index
 use arrow::array::Array;
-use hashbrown::hash_map::DefaultHashBuilder;
+// use hashbrown::hash_map::DefaultHashBuilder;
 
 pub trait Index {
     /// set index in the columns, one or more columns
@@ -18,7 +19,7 @@ pub struct HashIndex {
 
 impl Index for HashIndex {
     fn create_index(columns: Vec<Box<dyn Array>>) -> Option<Vec<u64>> {
-        let iter = columns.into_iter();
+        // let iter = columns.into_iter();
 
         None
     }

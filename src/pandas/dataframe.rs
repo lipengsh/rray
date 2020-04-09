@@ -1,9 +1,10 @@
 use crate::pandas::Columns;
-use crate::pandas::Index;
+// use crate::pandas::Index;
 use arrow::array::Array;
-use std::sync::Arc;
+// use std::sync::Arc;
 
 /// dataframe struct and impl
+#[warn(dead_code)]
 pub struct Dataframe {
     /// columns's data，like
     /// data = {'Name':['Jai', 'Princi', 'Gaurav', 'Anuj'],
