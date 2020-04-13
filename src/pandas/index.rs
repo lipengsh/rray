@@ -17,6 +17,9 @@ pub trait Index {
 
     // generate string and u32 type hash index
     fn two_u32_str(&mut self, columns_u32: &[u32], columns_string: &[String]);
+
+    // get index vec
+    fn index(&self) -> Vec<u32>;
 }
 
 pub struct HashIndex {
@@ -34,6 +37,10 @@ impl Index for HashIndex {
             count: 0,
             hasher: Vec::new(),
         }
+    }
+
+    fn index(&self) -> Vec<u32> {
+        self.hasher.clone()
     }
 
     fn one_u32(&mut self, columns: &[u32]) {
