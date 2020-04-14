@@ -8,13 +8,16 @@ pub trait Index {
     // fn create_index(columns: Vec<Box<dyn Array>>) -> Option<Vec<u32>>;
 
     // generate u32 type hash index
-    fn one_u32(&mut self, columns: &[u32]);
+    fn one_u32(&mut self, column: &[u32]);
 
     // generate string type hash index
-    fn one_string(&mut self, columns: &[String]);
+    fn one_string(&mut self, column: &[String]);
 
     // generate string and u32 type hash index
-    fn two_u32_str(&mut self, columns_u32: &[u32], columns_string: &[String]);
+    fn two_u32_str(&mut self, column_u32: &[u32], column_string: &[String]);
+
+    // generate two string hash index
+    fn two_str(&mut self, column_string_one: &[String], column_string_two: &[String]);
 
     // get index vec
     fn index(&self) -> Vec<u32>;
@@ -34,8 +37,8 @@ impl Index for HashIndex {
         self.hasher.clone()
     }
 
-    fn one_u32(&mut self, columns: &[u32]) {
-        let result: Vec<u32> = columns
+    fn one_u32(&mut self, column: &[u32]) {
+        let result: Vec<u32> = column
             .into_par_iter()
             .map_init(
                 || AHasher::default(),
@@ -48,8 +51,8 @@ impl Index for HashIndex {
         self.hasher = Vec::from(result);
     }
 
-    fn one_string(&mut self, columns: &[String]) {
-        let result: Vec<u32> = columns
+    fn one_string(&mut self, column: &[String]) {
+        let result: Vec<u32> = column
             .into_par_iter()
             .map_init(
                 || AHasher::default(),
@@ -62,13 +65,28 @@ impl Index for HashIndex {
         self.hasher = Vec::from(result);
     }
 
-    fn two_u32_str(&mut self, columns_u32: &[u32], columns_string: &[String]) {
-        let result: Vec<u32> = (columns_u32, columns_string)
+    fn two_u32_str(&mut self, column_u32: &[u32], column_string: &[String]) {
+        let result: Vec<u32> = (column_u32, column_string)
             .into_par_iter()
             .map_init(
                 || AHasher::default(),
                 |h, (x, s)| {
                     h.write_u32(*x);
+                    h.write(s.as_bytes());
+                    h.finish() as u32
+                },
+            )
+            .collect();
+        self.hasher = Vec::from(result);
+    }
+
+    fn two_str(&mut self, column_string_one: &[String], column_string_two: &[String]) {
+        let result: Vec<u32> = (column_string_one, column_string_two)
+            .into_par_iter()
+            .map_init(
+                || AHasher::default(),
+                |h, (x, s)| {
+                    h.write(x.as_bytes());
                     h.write(s.as_bytes());
                     h.finish() as u32
                 },
