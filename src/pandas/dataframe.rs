@@ -1,41 +1,41 @@
 use crate::pandas::index::{HashIndex, Index};
 use arrow::array;
-use arrow::array::{Array, UInt32Array};
+use arrow::array::{Array, Float32Array, StringArray, UInt32Array};
 use arrow::datatypes::DataType;
 use rayon::prelude::*;
+use std::hash::Hash;
 
 /// dataframe struct and impl
-pub struct Dataframe<'a> {
-    /// columns's data，like
-    /// data = {'Name':['Jai', 'Princi', 'Gaurav', 'Anuj'],
-    ///         'Age':[27, 24, 22, 32],
-    ///         'Address':['Delhi', 'Kanpur', 'Allahabad', 'Kannauj'],
-    ///         'Qualification':['Msc', 'MA', 'MCA', 'Phd']}
-    /// dyn trait(Index) is dynamic dispatch for polymorphism situation
-    /// because trait has impl ,trait is dynamic
-    data: &'a [f32],
-    columns_name: &'a [String],
+pub struct FloatDataframe<'a> {
+    /// float data and column's name
+    float_data: &'a [Float32Array],
+    float_columns_name: &'a [String],
+
+    /// String data and columns's name
+    string_data: &'a [Box<[String]>],
+    string_columns_name: &'a [String],
     row_length: u32,
-    column_length: u32,
-    /// index trait
-    /// box is a pointer to value in heap, pointer is in stack
     /// hash index
-    index: &'a [u32],
+    /// set from outter , todo: change allocate position
+    index: Box<dyn Index>,
 }
 
-impl<'a> Dataframe<'a> {
-    fn new(
-        data: &'a [f32],
-        row_length: u32,
-        column_length: u32,
-        columns_name: &'a [String],
-    ) -> Self {
-        Dataframe {
-            data,
-            column_length,
-            row_length,
-            columns_name,
-            index: &[0u32],
-        }
+impl<'a> FloatDataframe<'a> {
+    /// only set index on string columns's name
+    /// columns number <=2
+    fn set_index(string_columns_name: &[String]) {}
+
+    fn set_one_index(&mut self, string_column_name: String) {
+        // get this column's index on columns name strings
+        let column_name_index = self
+            .string_columns_name
+            .into_par_iter()
+            .position(|r| r.to_string() == string_column_name)
+            .unwrap();
+
+        let string_array = &self.string_data[column_name_index];
+        self.index.one_string(&string_array);
     }
+
+    fn set_two_index(string_columns_name: &[String]) {}
 }

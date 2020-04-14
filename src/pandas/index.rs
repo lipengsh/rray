@@ -4,8 +4,6 @@ use std::hash::Hasher;
 use rayon::prelude::*;
 
 pub trait Index {
-    fn new() -> Self;
-
     /// set index in the columns, one or more columns
     // fn create_index(columns: Vec<Box<dyn Array>>) -> Option<Vec<u32>>;
 
@@ -32,13 +30,6 @@ pub struct HashIndex {
 }
 
 impl Index for HashIndex {
-    fn new() -> HashIndex {
-        HashIndex {
-            count: 0,
-            hasher: Vec::new(),
-        }
-    }
-
     fn index(&self) -> Vec<u32> {
         self.hasher.clone()
     }
@@ -98,7 +89,10 @@ fn test_one_u32() {
     let mut rand_array = gen_u32(SIZE);
 
     // use index trait
-    let mut index: HashIndex = Index::new();
+    let mut index: HashIndex = HashIndex {
+        count: 0,
+        hasher: Vec::new(),
+    };
 
     // calculate hash time
     use std::time::Instant;
@@ -124,7 +118,10 @@ fn test_string() {
     use std::time::Instant;
 
     // use index trait
-    let mut index: HashIndex = Index::new();
+    let mut index: HashIndex = HashIndex {
+        count: 0,
+        hasher: Vec::new(),
+    };
 
     let gen_start = Instant::now();
     index.one_string(&rand_string);
@@ -147,7 +144,10 @@ fn test_string_u32() {
     let mut rand_string: Vec<String> = gen_string(SIZE);
 
     // use index trait
-    let mut index: HashIndex = Index::new();
+    let mut index: HashIndex = HashIndex {
+        count: 0,
+        hasher: Vec::new(),
+    };
 
     // calculate hash time
     use std::time::Instant;
