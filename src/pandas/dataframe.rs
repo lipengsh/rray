@@ -3,6 +3,7 @@ use arrow::array;
 use arrow::array::{Array, Float32Array, StringArray, UInt32Array};
 use arrow::datatypes::DataType;
 use rayon::prelude::*;
+use std::borrow::BorrowMut;
 use std::hash::Hash;
 
 /// dataframe struct and impl
@@ -16,7 +17,7 @@ pub struct FloatDataframe<'a> {
     string_columns_name: &'a [String],
     row_length: u32,
     /// hash index
-    /// set from outter , todo: change allocate position
+    /// set from trait outer , todo: change allocate position
     index: Box<dyn Index>,
 }
 
@@ -67,4 +68,33 @@ impl<'a> FloatDataframe<'a> {
         let string_array_1: &[String] = &self.string_data[column_name_index_1];
         self.index.two_str(string_array_0, string_array_1);
     }
+}
+
+#[test]
+fn unique() {
+    // let mut v = [(1, -5i32), (3, 4), (1, 1), (2, -3), (2, 2)];
+
+    // v.par_sort_by_key(|k| k.0);
+    use std::sync::atomic::AtomicUsize;
+    //
+    // let mut v: Vec<i32> = vec![1, 2, 5, 2, 9, 4, 1, 5, 2];
+    // use std::cell::RefCell;
+    // thread_local!(static STORE: RefCell<Vec<i32>> = RefCell::new(Vec::new()));
+    //
+    // v.into_par_iter().map(move |x| {
+    //     STORE.with(|cell| {
+    //         let mut local_store = cell.borrow_mut();
+    //         *local_store.push(x);
+    //         // let ls: &mut Vec<i32> = local_store.as_mut();
+    //         // if !ls.contains(&x) {
+    //         // ls.push(x);
+    //         // }
+    //     })
+    // });
+    //
+    // println!("store");
+    //
+    // STORE.with(|cell| {
+    //     println!("{:?}", cell.borrow_mut());
+    // });
 }
