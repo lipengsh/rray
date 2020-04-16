@@ -72,29 +72,14 @@ impl<'a> FloatDataframe<'a> {
 
 #[test]
 fn unique() {
-    // let mut v = [(1, -5i32), (3, 4), (1, 1), (2, -3), (2, 2)];
+    let mut v = [1, 3, 4, 1, 1, 2, -3, 2, 2];
 
-    // v.par_sort_by_key(|k| k.0);
-    use std::sync::atomic::AtomicUsize;
-    //
-    // let mut v: Vec<i32> = vec![1, 2, 5, 2, 9, 4, 1, 5, 2];
-    // use std::cell::RefCell;
-    // thread_local!(static STORE: RefCell<Vec<i32>> = RefCell::new(Vec::new()));
-    //
-    // v.into_par_iter().map(move |x| {
-    //     STORE.with(|cell| {
-    //         let mut local_store = cell.borrow_mut();
-    //         *local_store.push(x);
-    //         // let ls: &mut Vec<i32> = local_store.as_mut();
-    //         // if !ls.contains(&x) {
-    //         // ls.push(x);
-    //         // }
-    //     })
-    // });
-    //
-    // println!("store");
-    //
-    // STORE.with(|cell| {
-    //     println!("{:?}", cell.borrow_mut());
-    // });
+    let mut groups: Vec<i32> = Vec::new();
+
+    for i in &v {
+        if !groups.contains(i) {
+            groups.push(*i);
+        }
+    }
+    println!("groups:{:?}", groups);
 }
