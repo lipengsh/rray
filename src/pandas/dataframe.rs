@@ -4,6 +4,7 @@ use arrow::array::{Array, Float32Array, StringArray, UInt32Array};
 use arrow::datatypes::DataType;
 use rayon::prelude::*;
 use std::borrow::BorrowMut;
+use std::collections::BTreeSet;
 use std::hash::Hash;
 
 /// dataframe struct and impl
@@ -72,14 +73,18 @@ impl<'a> FloatDataframe<'a> {
 
 #[test]
 fn unique() {
-    let mut v = [1, 3, 4, 1, 1, 2, -3, 2, 2];
+    let mut v = vec![1, 3, 4, 1, 1, 2, -3, 2, 2];
+    v.sort();
 
-    let mut groups: Vec<i32> = Vec::new();
+    let c: Vec<i32> = Some(v[0])
+        .into_iter()
+        .chain(v.windows(2).filter((|w| w[0] != w[1])).map(|w| w[1]))
+        .collect();
 
-    for i in &v {
-        if !groups.contains(i) {
-            groups.push(*i);
-        }
-    }
-    println!("groups:{:?}", groups);
+    println!("c:{:?}", c);
+
+    use itertools::Itertools;
+
+    let n: Vec<i32> = v.into_iter().unique().collect();
+    println!("n:{:?}", n);
 }

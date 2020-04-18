@@ -1,3 +1,4 @@
+mod builder;
 mod dataframe;
 mod groupby;
 mod index;
