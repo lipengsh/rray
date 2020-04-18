@@ -1,12 +1,10 @@
+#[warn(unused_imports)]
 use crate::pandas::index::HashIndex;
-use arrow::array;
-use arrow::array::{Array, Float32Array, StringArray, UInt32Array};
-use arrow::datatypes::DataType;
+use arrow::array::Float32Array;
 use rayon::prelude::*;
-use std::borrow::BorrowMut;
-use std::collections::BTreeSet;
-use std::hash::Hash;
+use std::fmt;
 
+#[allow(dead_code)]
 /// dataframe struct and impl
 pub struct FloatDataframe<'a> {
     /// float data and column's name
@@ -18,14 +16,14 @@ pub struct FloatDataframe<'a> {
     pub(crate) string_columns_name: &'a [String],
 
     // row and columns length
-    pub(crate) row_length: u32,
-    pub(crate) columns_length: u32,
+    pub(crate) row_length: usize,
+    pub(crate) columns_length: usize,
 
     /// hash index
     /// set from trait outer , todo: change allocate position
     pub(crate) index: HashIndex,
 }
-
+#[allow(dead_code)]
 impl<'a> FloatDataframe<'a> {
     /// only set index on string columns's name
     /// columns number <=2
@@ -49,7 +47,7 @@ impl<'a> FloatDataframe<'a> {
         let column_name_index = self
             .string_columns_name
             .into_par_iter()
-            .position(|r| r.to_string() == *string_column_name)
+            .position_any(|r| r.to_string() == *string_column_name)
             .unwrap();
 
         let string_array = &self.string_data[column_name_index];
@@ -61,12 +59,12 @@ impl<'a> FloatDataframe<'a> {
         let column_name_index_0 = self
             .string_columns_name
             .into_par_iter()
-            .position(|r| r.to_string() == string_columns_name[0])
+            .position_any(|r| r.to_string() == string_columns_name[0])
             .unwrap();
         let column_name_index_1 = self
             .string_columns_name
             .into_par_iter()
-            .position(|r| r.to_string() == string_columns_name[1])
+            .position_any(|r| r.to_string() == string_columns_name[1])
             .unwrap();
 
         let string_array_0: &[String] = &self.string_data[column_name_index_0];
@@ -75,14 +73,50 @@ impl<'a> FloatDataframe<'a> {
     }
 }
 
+impl<'a> fmt::Debug for FloatDataframe<'a> {
+    default fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(
+            f,
+            "row length:{}, columns length:{}",
+            self.row_length, self.columns_length
+        )
+        .unwrap();
+
+        for i in 0..self.columns_length {
+            writeln!(
+                f,
+                "float column name:{:?}\n, float data :{:?}",
+                self.float_columns_name[i], self.float_data[i],
+            )
+            .unwrap();
+
+            writeln!(
+                f,
+                "string column name :{:?}\n, string data:{:?}",
+                self.string_columns_name[i], self.string_data[i],
+            )
+            .unwrap();
+
+            if i > 3 {
+                writeln!(f, "...").unwrap();
+                break;
+            }
+            writeln!(f, "----------").unwrap();
+        }
+
+        writeln!(f)
+    }
+}
+
 #[test]
+#[cfg(test)]
 fn unique() {
     let mut v = vec![1, 3, 4, 1, 1, 2, -3, 2, 2];
     v.sort();
 
     let c: Vec<i32> = Some(v[0])
         .into_iter()
-        .chain(v.windows(2).filter((|w| w[0] != w[1])).map(|w| w[1]))
+        .chain(v.windows(2).filter(|w| w[0] != w[1]).map(|w| w[1]))
         .collect();
 
     println!("c:{:?}", c);

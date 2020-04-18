@@ -2,7 +2,7 @@ use crate::pandas::index::HashIndex;
 use crate::pandas::FloatDataframe;
 use arrow::array::{ArrayRef, Float32Array, PrimitiveBuilder};
 use arrow::datatypes::{ArrowPrimitiveType, DataType};
-
+#[allow(dead_code)]
 pub struct DataframeBuilder<T: ArrowPrimitiveType> {
     data_type: DataType,
     len: usize,
@@ -11,6 +11,7 @@ pub struct DataframeBuilder<T: ArrowPrimitiveType> {
 }
 
 #[test]
+#[cfg(test)]
 fn builder() {
     const ROW_LEN: usize = 5;
     const COLUMN_LEN: usize = 10;
@@ -43,8 +44,6 @@ fn builder() {
 
         string_data.push(box_string_array);
     }
-    let df_string_data = string_data.as_slice();
-    let df_columns_name = string_columns_name.as_slice();
 
     // set index, string columns 0 and 1 as two key index
     let mut index: HashIndex = HashIndex {
@@ -56,19 +55,22 @@ fn builder() {
     index.two_str(string_data[0].as_ref(), string_data[1].as_ref());
 
     // print_fdata(float_data);
-    println!("columns name:{:?}", float_columns_name);
+    // println!("columns name:{:?}", float_columns_name);
 
     let float_df = FloatDataframe {
         float_data: float_data.as_slice(),
         float_columns_name: float_columns_name.as_slice(),
         string_data: string_data.as_slice(),
         string_columns_name: string_columns_name.as_slice(),
-        row_length: ROW_LEN as u32,
-        columns_length: COLUMN_LEN as u32,
+        row_length: ROW_LEN,
+        columns_length: COLUMN_LEN,
         index,
     };
+
+    println!("float dataframe:{:?}", float_df);
 }
 
+#[allow(dead_code)]
 fn print_fdata(float_data: Vec<Float32Array>) {
     for i in 0..float_data.len() {
         println!("{:?}", float_data[i]);
@@ -92,6 +94,7 @@ fn gen_string(size: usize) -> Vec<String> {
     rand_string
 }
 
+#[allow(dead_code)]
 fn gen_u32(size: usize) -> Vec<u32> {
     // random u32 array
     let mut rand_array = vec![0u32; size];

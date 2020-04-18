@@ -22,7 +22,7 @@ use rayon::prelude::*;
 //     // get index vec
 //     fn index(&self) -> Vec<u32>;
 // }
-
+#[allow(dead_code)]
 pub struct HashIndex {
     // hash index's count
     pub(crate) count: u32,
@@ -36,9 +36,9 @@ pub struct HashIndex {
 }
 
 impl HashIndex {
-    pub fn index(&self) -> Vec<u32> {
-        self.hasher.clone()
-    }
+    // pub fn index(&self) -> Vec<u32> {
+    //     self.hasher.clone()
+    // }
 
     pub fn one_u32(&mut self, column: &[u32]) {
         let result: Vec<u32> = column
@@ -107,7 +107,7 @@ fn test_one_u32() {
     const SIZE: usize = 1024 * 100;
 
     // gen u32 array
-    let mut rand_array = gen_u32(SIZE);
+    let rand_array = gen_u32(SIZE);
 
     // use index trait
     let mut index: HashIndex = HashIndex {
@@ -134,7 +134,7 @@ fn test_string() {
     const SIZE: usize = 1024 * 100;
 
     // gen string array
-    let mut rand_string: Vec<String> = gen_string(SIZE);
+    let rand_string: Vec<String> = gen_string(SIZE);
 
     // calculate hash time
     use std::time::Instant;
@@ -161,10 +161,10 @@ fn test_string() {
 fn test_string_u32() {
     const SIZE: usize = 1024 * 10000;
     // gen u32 array
-    let mut rand_array = gen_u32(SIZE);
+    let rand_array = gen_u32(SIZE);
 
     // gen string array
-    let mut rand_string: Vec<String> = gen_string(SIZE);
+    let rand_string: Vec<String> = gen_string(SIZE);
 
     // use index trait
     let mut index: HashIndex = HashIndex {
