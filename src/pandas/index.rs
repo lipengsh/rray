@@ -2,42 +2,45 @@ use ahash::AHasher;
 use std::hash::Hasher;
 // use hashbrown::hash_map::DefaultHashBuilder;
 use rayon::prelude::*;
-
-pub trait Index {
-    /// set index in the columns, one or more columns
-    // fn create_index(columns: Vec<Box<dyn Array>>) -> Option<Vec<u32>>;
-
-    // generate u32 type hash index
-    fn one_u32(&mut self, column: &[u32]);
-
-    // generate string type hash index
-    fn one_string(&mut self, column: &[String]);
-
-    // generate string and u32 type hash index
-    fn two_u32_str(&mut self, column_u32: &[u32], column_string: &[String]);
-
-    // generate two string hash index
-    fn two_str(&mut self, column_string_one: &[String], column_string_two: &[String]);
-
-    // get index vec
-    fn index(&self) -> Vec<u32>;
-}
+//
+// pub trait Index {
+//     /// set index in the columns, one or more columns
+//     // fn create_index(columns: Vec<Box<dyn Array>>) -> Option<Vec<u32>>;
+//
+//     // generate u32 type hash index
+//     fn one_u32(&mut self, column: &[u32]);
+//
+//     // generate string type hash index
+//     fn one_string(&mut self, column: &[String]);
+//
+//     // generate string and u32 type hash index
+//     fn two_u32_str(&mut self, column_u32: &[u32], column_string: &[String]);
+//
+//     // generate two string hash index
+//     fn two_str(&mut self, column_string_one: &[String], column_string_two: &[String]);
+//
+//     // get index vec
+//     fn index(&self) -> Vec<u32>;
+// }
 
 pub struct HashIndex {
     // hash index's count
-    count: u32,
+    pub(crate) count: u32,
 
     // hash code, u64 type
     // vec's index is row number
-    hasher: Vec<u32>,
+    pub(crate) hasher: Vec<u32>,
+
+    // columns's name as index
+    pub(crate) columns: Vec<String>,
 }
 
-impl Index for HashIndex {
-    fn index(&self) -> Vec<u32> {
+impl HashIndex {
+    pub fn index(&self) -> Vec<u32> {
         self.hasher.clone()
     }
 
-    fn one_u32(&mut self, column: &[u32]) {
+    pub fn one_u32(&mut self, column: &[u32]) {
         let result: Vec<u32> = column
             .into_par_iter()
             .map_init(
@@ -51,7 +54,7 @@ impl Index for HashIndex {
         self.hasher = Vec::from(result);
     }
 
-    fn one_string(&mut self, column: &[String]) {
+    pub fn one_string(&mut self, column: &[String]) {
         let result: Vec<u32> = column
             .into_par_iter()
             .map_init(
@@ -65,7 +68,7 @@ impl Index for HashIndex {
         self.hasher = Vec::from(result);
     }
 
-    fn two_u32_str(&mut self, column_u32: &[u32], column_string: &[String]) {
+    pub fn two_u32_str(&mut self, column_u32: &[u32], column_string: &[String]) {
         let result: Vec<u32> = (column_u32, column_string)
             .into_par_iter()
             .map_init(
@@ -80,7 +83,7 @@ impl Index for HashIndex {
         self.hasher = Vec::from(result);
     }
 
-    fn two_str(&mut self, column_string_one: &[String], column_string_two: &[String]) {
+    pub fn two_str(&mut self, column_string_one: &[String], column_string_two: &[String]) {
         let result: Vec<u32> = (column_string_one, column_string_two)
             .into_par_iter()
             .map_init(
@@ -110,6 +113,7 @@ fn test_one_u32() {
     let mut index: HashIndex = HashIndex {
         count: 0,
         hasher: Vec::new(),
+        columns: Vec::new(),
     };
 
     // calculate hash time
@@ -139,6 +143,7 @@ fn test_string() {
     let mut index: HashIndex = HashIndex {
         count: 0,
         hasher: Vec::new(),
+        columns: Vec::new(),
     };
 
     let gen_start = Instant::now();
@@ -165,6 +170,7 @@ fn test_string_u32() {
     let mut index: HashIndex = HashIndex {
         count: 0,
         hasher: Vec::new(),
+        columns: Vec::new(),
     };
 
     // calculate hash time

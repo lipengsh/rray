@@ -1,4 +1,4 @@
-use crate::pandas::index::{HashIndex, Index};
+use crate::pandas::index::HashIndex;
 use arrow::array;
 use arrow::array::{Array, Float32Array, StringArray, UInt32Array};
 use arrow::datatypes::DataType;
@@ -10,16 +10,20 @@ use std::hash::Hash;
 /// dataframe struct and impl
 pub struct FloatDataframe<'a> {
     /// float data and column's name
-    float_data: &'a [Float32Array],
-    float_columns_name: &'a [String],
+    pub(crate) float_data: &'a [Float32Array],
+    pub(crate) float_columns_name: &'a [String],
 
     /// String data and columns's name
-    string_data: &'a [Box<[String]>],
-    string_columns_name: &'a [String],
-    row_length: u32,
+    pub(crate) string_data: &'a [Box<[String]>],
+    pub(crate) string_columns_name: &'a [String],
+
+    // row and columns length
+    pub(crate) row_length: u32,
+    pub(crate) columns_length: u32,
+
     /// hash index
     /// set from trait outer , todo: change allocate position
-    index: Box<dyn Index>,
+    pub(crate) index: HashIndex,
 }
 
 impl<'a> FloatDataframe<'a> {
