@@ -1,8 +1,7 @@
-mod builder;
-mod dataframe;
-mod groupby;
-mod index;
-mod prod;
+pub mod builder;
+pub mod dataframe;
+pub mod groupby;
+pub mod index;
+pub mod prod;
+pub mod utils;
 
-pub use dataframe::FloatDataframe;
-pub use groupby::Groupby;

@@ -4,7 +4,6 @@ use arrow::array::Float32Array;
 use rayon::prelude::*;
 use std::fmt;
 
-#[allow(dead_code)]
 /// dataframe struct and impl
 pub struct FloatDataframe<'a> {
     /// float data and column's name
@@ -23,11 +22,12 @@ pub struct FloatDataframe<'a> {
     /// set from trait outer , todo: change allocate position
     pub(crate) index: HashIndex,
 }
-#[allow(dead_code)]
+
+
 impl<'a> FloatDataframe<'a> {
     /// only set index on string columns's name
     /// columns number <=2
-    fn set_index(&mut self, string_columns_name: &[String]) -> bool {
+    pub fn set_index(&mut self, string_columns_name: &[String]) -> bool {
         let length = string_columns_name.len();
         if length == 0 {
             return false;
@@ -42,7 +42,7 @@ impl<'a> FloatDataframe<'a> {
         true
     }
 
-    fn set_one_index(&mut self, string_column_name: &String) {
+    pub fn set_one_index(&mut self, string_column_name: &String) {
         // get this column's index on columns name strings
         let column_name_index = self
             .string_columns_name
@@ -54,7 +54,7 @@ impl<'a> FloatDataframe<'a> {
         self.index.one_string(&string_array);
     }
 
-    fn set_two_index(&mut self, string_columns_name: &[String]) {
+    pub fn set_two_index(&mut self, string_columns_name: &[String]) {
         // get this column's index on columns name strings
         let column_name_index_0 = self
             .string_columns_name
@@ -108,21 +108,24 @@ impl<'a> fmt::Debug for FloatDataframe<'a> {
     }
 }
 
-#[test]
 #[cfg(test)]
-fn unique() {
-    let mut v = vec![1, 3, 4, 1, 1, 2, -3, 2, 2];
-    v.sort();
+mod test{
+    fn unique() {
+        let mut v = vec![1, 3, 4, 1, 1, 2, -3, 2, 2];
+        v.sort();
 
-    let c: Vec<i32> = Some(v[0])
-        .into_iter()
-        .chain(v.windows(2).filter(|w| w[0] != w[1]).map(|w| w[1]))
-        .collect();
+        let c: Vec<i32> = Some(v[0])
+            .into_iter()
+            .chain(v.windows(2).filter(|w| w[0] != w[1]).map(|w| w[1]))
+            .collect();
 
-    println!("c:{:?}", c);
+        println!("c:{:?}", c);
 
-    use itertools::Itertools;
+        use itertools::Itertools;
 
-    let n: Vec<i32> = v.into_iter().unique().collect();
-    println!("n:{:?}", n);
+        let n: Vec<i32> = v.into_iter().unique().collect();
+        println!("n:{:?}", n);
+    }
 }
+
+

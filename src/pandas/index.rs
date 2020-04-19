@@ -1,29 +1,9 @@
+use rayon::prelude::*;
 use ahash::AHasher;
 use std::hash::Hasher;
-// use hashbrown::hash_map::DefaultHashBuilder;
-use rayon::prelude::*;
-//
-// pub trait Index {
-//     /// set index in the columns, one or more columns
-//     // fn create_index(columns: Vec<Box<dyn Array>>) -> Option<Vec<u32>>;
-//
-//     // generate u32 type hash index
-//     fn one_u32(&mut self, column: &[u32]);
-//
-//     // generate string type hash index
-//     fn one_string(&mut self, column: &[String]);
-//
-//     // generate string and u32 type hash index
-//     fn two_u32_str(&mut self, column_u32: &[u32], column_string: &[String]);
-//
-//     // generate two string hash index
-//     fn two_str(&mut self, column_string_one: &[String], column_string_two: &[String]);
-//
-//     // get index vec
-//     fn index(&self) -> Vec<u32>;
-// }
-#[allow(dead_code)]
+
 pub struct HashIndex {
+    #[allow(dead_code)]
     // hash index's count
     pub(crate) count: u32,
 
@@ -32,6 +12,7 @@ pub struct HashIndex {
     pub(crate) hasher: Vec<u32>,
 
     // columns's name as index
+    #[allow(dead_code)]
     pub(crate) columns: Vec<String>,
 }
 
@@ -99,116 +80,95 @@ impl HashIndex {
     }
 }
 
-#[test]
-/// 1024*100 : 6 millis
-/// 1024*1000: 48 millis
-/// 1024*10000: 477 millis
-fn test_one_u32() {
-    const SIZE: usize = 1024 * 100;
 
-    // gen u32 array
-    let rand_array = gen_u32(SIZE);
+#[cfg(test)]
+mod test{
+    use crate::pandas::utils::{gen_f32,gen_u32,gen_string};
+    use crate::pandas::index::HashIndex;
 
-    // use index trait
-    let mut index: HashIndex = HashIndex {
-        count: 0,
-        hasher: Vec::new(),
-        columns: Vec::new(),
-    };
+    #[test]
+    /// 1024*100 : 6 millis
+    /// 1024*1000: 48 millis
+    /// 1024*10000: 477 millis
+    fn test_one_u32() {
+        const SIZE: usize = 1024 * 100;
 
-    // calculate hash time
-    use std::time::Instant;
+        // gen u32 array
+        let rand_array = gen_u32(SIZE);
 
-    let gen_start = Instant::now();
-    index.one_u32(&rand_array);
-    println!(
-        "test_one_u32 used time:{} millis",
-        gen_start.elapsed().as_millis()
-    );
-}
-#[test]
-/// 1024*100 :23 millis
-/// 1024*1000: 264 millis
-/// 1024*10000: 2718 millis
-fn test_string() {
-    const SIZE: usize = 1024 * 100;
+        // use index trait
+        let mut index: HashIndex = HashIndex {
+            count: 0,
+            hasher: Vec::new(),
+            columns: Vec::new(),
+        };
 
-    // gen string array
-    let rand_string: Vec<String> = gen_string(SIZE);
+        // calculate hash time
+        use std::time::Instant;
 
-    // calculate hash time
-    use std::time::Instant;
-
-    // use index trait
-    let mut index: HashIndex = HashIndex {
-        count: 0,
-        hasher: Vec::new(),
-        columns: Vec::new(),
-    };
-
-    let gen_start = Instant::now();
-    index.one_string(&rand_string);
-    println!(
-        "test_string used time:{} millis",
-        gen_start.elapsed().as_millis()
-    );
-}
-
-#[test]
-/// 1024*100 : 25 millis
-/// 1024*1000 : 240 millis
-/// 1024*10000 : 2471 millis
-fn test_string_u32() {
-    const SIZE: usize = 1024 * 10000;
-    // gen u32 array
-    let rand_array = gen_u32(SIZE);
-
-    // gen string array
-    let rand_string: Vec<String> = gen_string(SIZE);
-
-    // use index trait
-    let mut index: HashIndex = HashIndex {
-        count: 0,
-        hasher: Vec::new(),
-        columns: Vec::new(),
-    };
-
-    // calculate hash time
-    use std::time::Instant;
-
-    let gen_start = Instant::now();
-    index.two_u32_str(&rand_array, &rand_string);
-    println!(
-        "test_string_u32 used time:{} millis",
-        gen_start.elapsed().as_millis()
-    );
-}
-
-fn gen_u32(size: usize) -> Vec<u32> {
-    use rand::thread_rng;
-    use rand::Rng;
-    // random u32 array
-    let mut rand_array = vec![0u32; size];
-    let mut rng = thread_rng();
-    for i in 0..size {
-        rand_array[i] = rng.gen();
+        let gen_start = Instant::now();
+        index.one_u32(&rand_array);
+        println!(
+            "test_one_u32 used time:{} millis",
+            gen_start.elapsed().as_millis()
+        );
     }
-    rand_array
-}
+    #[test]
+    /// 1024*100 :23 millis
+    /// 1024*1000: 264 millis
+    /// 1024*10000: 2718 millis
+    fn test_string() {
+        const SIZE: usize = 1024 * 100;
 
-fn gen_string(size: usize) -> Vec<String> {
-    use rand::distributions::Alphanumeric;
-    use rand::thread_rng;
-    use rand::Rng;
+        // gen string array
+        let rand_string: Vec<String> = gen_string(SIZE);
 
-    let mut rand_string: Vec<String> = Vec::new();
-    for _i in 0..size {
-        let rand_index = thread_rng().gen_range(5, 30);
-        let s: String = thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(rand_index)
-            .collect();
-        rand_string.push(s);
+        // calculate hash time
+        use std::time::Instant;
+
+        // use index trait
+        let mut index: HashIndex = HashIndex {
+            count: 0,
+            hasher: Vec::new(),
+            columns: Vec::new(),
+        };
+
+        let gen_start = Instant::now();
+        index.one_string(&rand_string);
+        println!(
+            "test_string used time:{} millis",
+            gen_start.elapsed().as_millis()
+        );
     }
-    rand_string
+
+    #[test]
+    /// 1024*100 : 25 millis
+    /// 1024*1000 : 240 millis
+    /// 1024*10000 : 2471 millis
+    fn test_string_u32() {
+        const SIZE: usize = 1024 * 10000;
+        // gen u32 array
+        let rand_array = gen_u32(SIZE);
+
+        // gen string array
+        let rand_string: Vec<String> = gen_string(SIZE);
+
+        // use index trait
+        let mut index: HashIndex = HashIndex {
+            count: 0,
+            hasher: Vec::new(),
+            columns: Vec::new(),
+        };
+
+        // calculate hash time
+        use std::time::Instant;
+
+        let gen_start = Instant::now();
+        index.two_u32_str(&rand_array, &rand_string);
+        println!(
+            "test_string_u32 used time:{} millis",
+            gen_start.elapsed().as_millis()
+        );
+    }
 }
+
