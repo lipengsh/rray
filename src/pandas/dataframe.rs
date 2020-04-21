@@ -42,7 +42,7 @@ impl<'a> FloatDataframe<'a> {
         true
     }
 
-    pub fn set_one_index(&mut self, string_column_name: &String) {
+    fn set_one_index(&mut self, string_column_name: &String) {
         // get this column's index on columns name strings
         let column_name_index = self
             .string_columns_name
@@ -54,7 +54,7 @@ impl<'a> FloatDataframe<'a> {
         self.index.one_string(&string_array);
     }
 
-    pub fn set_two_index(&mut self, string_columns_name: &[String]) {
+    fn set_two_index(&mut self, string_columns_name: &[String]) {
         // get this column's index on columns name strings
         let column_name_index_0 = self
             .string_columns_name
