@@ -1,8 +1,13 @@
+extern crate rray;
+
 use parquet::basic::Repetition::REQUIRED;
 use parquet::basic::Type::{BYTE_ARRAY, FLOAT};
 use parquet::basic::{Repetition, Type};
+use parquet::file::properties::WriterProperties;
+use parquet::file::writer::{FileWriter, SerializedFileWriter};
 use parquet::schema::types;
 use parquet::schema::types::PrimitiveTypeBuilder;
+use std::intrinsics::rotate_right;
 use std::rc::Rc;
 
 fn main() {
@@ -30,6 +35,14 @@ fn create_parquet() {
             .build()
             .unwrap(),
     );
+
+    let props = Rc::new(WriterProperties::builder().build());
+
+    let file =
+        rray::parquet::utils::get_temp_file("test_row_group_writer_num_records_mismatch", &[]);
+
+    let mut writer = SerializedFileWriter::new(file.try_clone().unwrap(), schema, props).unwrap();
+    writer.close().unwrap();
 
     println!("schema:{:?}", schema);
 }
