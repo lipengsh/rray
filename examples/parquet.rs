@@ -6,7 +6,7 @@ use parquet::data_type::{ByteArray, ByteArrayType, DataType};
 use parquet::file::properties::WriterProperties;
 use parquet::file::writer::{FileWriter, RowGroupWriter, SerializedFileWriter};
 use parquet::schema::types;
-use rray::pandas::utils::gen_string;
+use rray::pandas::utils::{gen_f32, gen_string};
 use std::rc::Rc;
 
 fn main() {
@@ -27,9 +27,9 @@ fn create_parquet() {
         types::Type::group_type_builder("schema")
             .with_fields(&mut vec![
                 create_column_schema("dim", Type::BYTE_ARRAY, REQUIRED),
-                // create_column_schema("tag", BYTE_ARRAY, REQUIRED),
-                // create_column_schema("ptr", FLOAT, REQUIRED),
-                // create_column_schema("mkt", FLOAT, REQUIRED),
+                create_column_schema("tag", Type::BYTE_ARRAY, REQUIRED),
+                create_column_schema("ptr", Type::FLOAT, REQUIRED),
+                create_column_schema("mkt", Type::FLOAT, REQUIRED),
             ])
             .build()
             .unwrap(),
@@ -44,11 +44,15 @@ fn create_parquet() {
     let row_group_size = 128;
 
     let dim_array = gen_string(array_len);
-    // let mut tag_array = gen_string(array_len);
-    // let mut ptr_array = gen_f32(array_len);
-    // let mut mkt_array: Vec<f32> = gen_f32(array_len);
+    let tag_array = gen_string(array_len);
+    let ptr_array: Vec<f32> = gen_f32(array_len);
+    let mkt_array: Vec<f32> = gen_f32(array_len);
 
     let dim_byte_array: Vec<ByteArray> = dim_array
+        .iter()
+        .map(|x| ByteArray::from(x.as_str()))
+        .collect();
+    let tag_byte_array: Vec<ByteArray> = tag_array
         .iter()
         .map(|x| ByteArray::from(x.as_str()))
         .collect();
@@ -67,13 +71,19 @@ fn create_parquet() {
             &mut row_group_writer,
             &dim_byte_array[offset..offset + row_group_size],
         );
-        // write_column(&row_group_writer, &tag_array[offset..row_group_size]);
-        // write_column(&row_group_writer, &ptr_array[offset..row_group_size]);
-        // write_column(&row_group_writer, &mkt_array[offset..row_group_size]);
-        // let result = write_column(
-        //     &row_group_writer,
-        //     &mkt_array[offset..offset + row_group_size],
-        // );
+        write_column::<ByteArrayType>(
+            &mut row_group_writer,
+            &tag_byte_array[offset..offset + row_group_size],
+        );
+        write_column::<f32>(
+            &mut row_group_writer,
+            &ptr_array[offset..offset + row_group_size],
+        );
+        write_column::<f32>(
+            &mut row_group_writer,
+            &mkt_array[offset..offset + row_group_size],
+        );
+
         offset += row_group_size;
 
         writer.close_row_group(row_group_writer).unwrap();
