@@ -2,7 +2,7 @@ extern crate rray;
 
 use parquet::basic::Repetition::REQUIRED;
 use parquet::basic::{Repetition, Type};
-use parquet::data_type::{ByteArray, ByteArrayType, DataType};
+use parquet::data_type::{ByteArray, ByteArrayType, DataType, FloatType};
 use parquet::file::properties::WriterProperties;
 use parquet::file::writer::{FileWriter, RowGroupWriter, SerializedFileWriter};
 use parquet::schema::types;
@@ -75,11 +75,11 @@ fn create_parquet() {
             &mut row_group_writer,
             &tag_byte_array[offset..offset + row_group_size],
         );
-        write_column::<f32>(
+        write_column::<FloatType>(
             &mut row_group_writer,
             &ptr_array[offset..offset + row_group_size],
         );
-        write_column::<f32>(
+        write_column::<FloatType>(
             &mut row_group_writer,
             &mkt_array[offset..offset + row_group_size],
         );
