@@ -1,5 +1,5 @@
 use parquet::basic::Type;
-use parquet::file::properties::WriterPropertiesPtr;
+use parquet::file::properties::{WriterProperties, WriterPropertiesPtr};
 use parquet::schema::types::TypePtr;
 use std::rc::Rc;
 
@@ -14,16 +14,25 @@ pub struct ColumnSchema {
 }
 
 impl Format {
-    pub fn set_schema(&self, schema_name: &str, columns_schema: Vec<ColumnSchema>) {
+    pub fn new(name: &str, schema: Vec<ColumnSchema>) -> Format {
+        Format {
+            schema: Self::create_schema(name, schema),
+            properties: Rc::new(WriterProperties::builder().build()),
+        }
+    }
+
+    pub fn create_schema(schema_name: &str, columns_schema: Vec<ColumnSchema>) -> TypePtr {
         let mut fields: Vec<TypePtr> = Vec::new();
         for item in &columns_schema {
             fields.push(Self::set_column_schema(item))
         }
 
-        parquet::schema::types::Type::group_type_builder(schema_name)
-            .with_fields(&mut fields)
-            .build()
-            .unwrap();
+        Rc::new(
+            parquet::schema::types::Type::group_type_builder(schema_name)
+                .with_fields(&mut fields)
+                .build()
+                .unwrap(),
+        )
     }
 
     pub fn set_column_schema(column_schema: &ColumnSchema) -> TypePtr {
