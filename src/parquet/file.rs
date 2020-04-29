@@ -1,10 +1,16 @@
 use crate::parquet::format::Format;
-use parquet::file::writer::{FileWriter, SerializedFileWriter};
+use parquet::column::writer::{get_typed_column_writer_mut, ColumnWriter};
+use parquet::data_type::DataType;
+use parquet::file::writer::{FileWriter, RowGroupWriter, SerializedFileWriter};
 use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::Write;
 use std::path;
+
+pub struct DynamicArray<T> {
+    value: Vec<T>,
+}
 
 /// parquet io struct and impl
 pub struct FileHandler {
@@ -54,8 +60,8 @@ impl ParquetWriter {
             .unwrap(),
         }
     }
-    //
-    // // write parquet
+
+    // // // write parquet
     // pub fn write_parquet(&mut self, data: &Vec<Vec<dyn DataType>>) {
     //     let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
     //
@@ -81,6 +87,9 @@ mod test {
     use crate::pandas::utils::{gen_f32, gen_string};
     use crate::parquet::file::{FileHandler, ParquetWriter};
     use crate::parquet::format::{ColumnSchema, Format};
+    // use parquet::basic::Type;
+    // use parquet::data_type::ByteArray;
+    use arrow::datatypes::DataType;
     use parquet::basic::Type;
     use parquet::data_type::ByteArray;
 
@@ -130,6 +139,6 @@ mod test {
         let sample_data = [dim_byte_array, tag_byte_array, ptr_array, mkt_array];
 
         // create ParquetWriter
-        // ParquetWriter::new(file_handler, file_format).write_parquet(&sample_data);
+        ParquetWriter::new(file_handler, file_format).write_parquet(&sample_data);
     }
 }
