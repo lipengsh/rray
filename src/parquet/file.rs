@@ -9,7 +9,7 @@ use std::io::Write;
 use std::path;
 
 pub struct DynamicArray<T> {
-    value: Vec<T>,
+    value: T,
 }
 
 /// parquet io struct and impl
@@ -26,7 +26,7 @@ impl FileHandler {
         file.write_all(&[]).unwrap();
         file.sync_all().unwrap();
 
-        // open the file, and return file handler for botyh read and write
+        // open the file, and return file handler for both read and write
         let file_handler = fs::OpenOptions::new()
             .read(true)
             .write(true)
@@ -89,9 +89,11 @@ mod test {
     use crate::parquet::format::{ColumnSchema, Format};
     // use parquet::basic::Type;
     // use parquet::data_type::ByteArray;
+    use crate::parquet::file::DynamicArray;
     use arrow::datatypes::DataType;
     use parquet::basic::Type;
     use parquet::data_type::ByteArray;
+    use std::any::{Any, TypeId};
 
     fn write_parquet() {
         // create file handler
@@ -127,18 +129,33 @@ mod test {
         let ptr_array: Vec<f32> = gen_f32(array_len);
         let mkt_array: Vec<f32> = gen_f32(array_len);
 
-        let dim_byte_array: Vec<ByteArray> = dim_array
-            .iter()
-            .map(|x| ByteArray::from(x.as_str()))
-            .collect();
-        let tag_byte_array: Vec<ByteArray> = tag_array
-            .iter()
-            .map(|x| ByteArray::from(x.as_str()))
-            .collect();
+        let dim_dynamic: Vec<(TypeId, Box<any>)> = make_dynamic_array!(String, dim_array);
+        let tag_dynamic: Vec<(TypeId, Box<any>)> = make_dynamic_array!(String, tag_array);
+        let ptr_dynamic: Vec<(TypeId, Box<any>)> = make_dynamic_array!(f32, ptr_array);
+        let mkt_dynamic: Vec<(TypeId, Box<any>)> = make_dynamic_array!(f32, mkt_array);
 
-        let sample_data = [dim_byte_array, tag_byte_array, ptr_array, mkt_array];
+        let array_gather: [Vec<(TypeId, Box<any>)>; 4] =
+            [dim_dynamic, tag_dynamic, ptr_dynamic, mkt_dynamic];
 
         // create ParquetWriter
-        ParquetWriter::new(file_handler, file_format).write_parquet(&sample_data);
+        // ParquetWriter::new(file_handler, file_format).write_parquet(&sample_data);
+
+        //        if let Some(s) = value.downcast_ref::<typeid>() { //Somehow downcast using typeid instead of type
+        //            println!("{:?}", s);
+        //        }
+    }
+
+    macro_rules! make_dynamic_array {
+        ($ty:ty, &array:ident) => {
+            $array
+                .iter()
+                .map(|x| {
+                    dim_dynamic.push((
+                        TypeId::of::<DynamicArray<&ty>>(),
+                        Box::new(DynamicArray { value: x }),
+                    ))
+                })
+                .collect()
+        };
     }
 }
