@@ -1,5 +1,5 @@
-use rayon::prelude::*;
 use ahash::AHasher;
+use rayon::prelude::*;
 use std::hash::Hasher;
 
 pub struct HashIndex {
@@ -80,11 +80,10 @@ impl HashIndex {
     }
 }
 
-
 #[cfg(test)]
-mod test{
-    use crate::pandas::utils::{gen_f32,gen_u32,gen_string};
+mod test {
     use crate::pandas::index::HashIndex;
+    use crate::pandas::utils::{gen_string, gen_u32};
 
     #[test]
     /// 1024*100 : 6 millis
@@ -171,4 +170,3 @@ mod test{
         );
     }
 }
-

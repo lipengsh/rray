@@ -1,5 +1,5 @@
-use arrow::datatypes::{ArrowPrimitiveType,DataType};
-use arrow::array::{ArrayRef,  PrimitiveBuilder};
+use arrow::array::{ArrayRef, PrimitiveBuilder};
+use arrow::datatypes::{ArrowPrimitiveType, DataType};
 
 #[allow(dead_code)]
 pub struct DataframeBuilder<T: ArrowPrimitiveType> {
@@ -10,10 +10,11 @@ pub struct DataframeBuilder<T: ArrowPrimitiveType> {
 }
 
 #[cfg(test)]
-mod test{
+mod test {
     use crate::pandas::dataframe::FloatDataframe;
-    use crate::pandas::utils::{gen_string, gen_u32, gen_f32};
     use crate::pandas::index::HashIndex;
+    use crate::pandas::utils::{gen_f32, gen_string};
+    use arrow::array::Float32Array;
 
     #[test]
     fn builder() {
@@ -21,11 +22,11 @@ mod test{
         const COLUMN_LEN: usize = 8;
 
         // build float data and columns's name
-        let mut float_data: Vec<Float30Array> = Vec::new();
+        let mut float_data: Vec<Float32Array> = Vec::new();
         let mut float_columns_name: Vec<String> = Vec::new();
         for i in 0..COLUMN_LEN {
-            let mut builder = Float30Array::builder(ROW_LEN);
-            let row_array = gen_f30(ROW_LEN);
+            let mut builder = Float32Array::builder(ROW_LEN);
+            let row_array = gen_f32(ROW_LEN);
             builder.append_slice(&row_array).unwrap();
             let f30_array = builder.finish();
             float_data.push(f30_array);
@@ -73,4 +74,3 @@ mod test{
         println!("float dataframe:{:?}", float_df);
     }
 }
-
