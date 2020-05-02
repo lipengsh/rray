@@ -28,6 +28,7 @@ mod test {
     use crate::parquet::utils::get_temp_file;
     use parquet::file::reader::Length;
 
+    #[test]
     fn get_file() {
         let file = get_temp_file("test", &[]);
         println!("file length:{}", file.len());

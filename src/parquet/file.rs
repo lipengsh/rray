@@ -1,5 +1,4 @@
 use crate::parquet::format::Format;
-use parquet::column::writer::{get_typed_column_writer_mut, ColumnWriter};
 use parquet::file::writer::{FileWriter, RowGroupWriter, SerializedFileWriter};
 use std::any::{Any, TypeId};
 use std::fs;
@@ -7,12 +6,6 @@ use std::fs::File;
 use std::io;
 use std::io::Write;
 use std::path;
-
-pub struct DynamicArray<T> {
-    value: T,
-}
-
-type TypeTuple<'a> = (TypeId, Box<&'a dyn Any>);
 
 /// parquet io struct and impl
 pub struct FileHandler {
@@ -64,26 +57,26 @@ impl ParquetWriter {
     }
 
     /// write parquet
-    pub fn write_parquet(&mut self, data: &Vec<Vec<TypeTuple>>) {
-        let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
-        for item in data {
-            if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-                // get_typed_column_writer_mut::<dyn >(&mut col_writer)
-                //     .write_batch(item, None, None)
-                //     .unwrap();
-                println!("next column");
-                row_group_writer.close_column(col_writer).unwrap();
-            }
-        }
-        self.writer_handler
-            .close_row_group(row_group_writer)
-            .unwrap();
-
-        // if let Some(s) = value.downcast_ref::<typeid>() {
-        //     //Somehow downcast using typeid instead of type
-        //     println!("{:?}", s);
-        // }
-    }
+    // pub fn write_parquet(&mut self, data: &Vec<Vec<TypeTuple>>) {
+    //     let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
+    //     for item in data {
+    //         if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
+    //             // get_typed_column_writer_mut::<dyn >(&mut col_writer)
+    //             //     .write_batch(item, None, None)
+    //             //     .unwrap();
+    //             println!("next column");
+    //             row_group_writer.close_column(col_writer).unwrap();
+    //         }
+    //     }
+    //     self.writer_handler
+    //         .close_row_group(row_group_writer)
+    //         .unwrap();
+    //
+    //     // if let Some(s) = value.downcast_ref::<typeid>() {
+    //     //     //Somehow downcast using typeid instead of type
+    //     //     println!("{:?}", s);
+    //     // }
+    // }
 
     // // // write parquet
     // pub fn write_parquet(&mut self, data: &Vec<Vec<dyn DataType>>) {
@@ -108,13 +101,8 @@ impl ParquetWriter {
 
 #[cfg(test)]
 mod test {
-    use crate::pandas::utils::{gen_f32, gen_string};
     use crate::parquet::file::{DynamicArray, TypeTuple};
-    use crate::parquet::file::{FileHandler, ParquetWriter};
-    use crate::parquet::format::{ColumnSchema, Format};
-    use parquet::basic::Type;
-    use std::any::{Any, TypeId};
-    use std::borrow::Borrow;
+    use std::any::TypeId;
 
     // macro_rules! make_dynamic_array {
     //     ($ty:ty, &array:expr) => {
@@ -130,17 +118,11 @@ mod test {
     //     };
     // }
 
-    //noinspection ALL
     // fn make_dynamic_array<T: 'static>(array: &'a Vec<T>, TypeResult: &'a mut Vec<TypeTuple>) {
     //     for item in array {
     //         TypeResult.push((TypeId::of::<DynamicArray<T>>(), Box::new(&item)));
     //     }
     // }
-
-    #[test]
-    fn typeis_check() {
-        println!("type:{:?}", TypeId::of::<String>());
-    }
 
     // #[test]
     // fn write_parquet() {
