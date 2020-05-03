@@ -101,7 +101,6 @@ impl ParquetWriter {
 
 #[cfg(test)]
 mod test {
-    use crate::parquet::file::{DynamicArray, TypeTuple};
     use std::any::TypeId;
 
     // macro_rules! make_dynamic_array {
