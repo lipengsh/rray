@@ -1,46 +1,46 @@
-use super::list::Types as RustTypes;
-use std::any::{Any, TypeId};
+//! from https://doc.rust-lang.org/reference/types.html
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Types {
+    NONE,
+    BOOLEAN,
+    // Numeric
+    U8,
+    U16,
+    U32,
+    U64,
+    U128,
+    I8,
+    I16,
+    I32,
+    I64,
+    I128,
 
-pub struct DynamicType<T> {
-    type_name: RustTypes,
-    data: T,
-}
+    // Textual
+    CHAR,
+    STRING,
 
-impl<T: 'static> DynamicType<T> {
-    pub fn new(value: T) -> Self {
-        DynamicType {
-            type_name: rust_type(&value),
-            data: value,
-        }
-    }
-}
+    NEVER,
 
-pub fn rust_type<T: 'static>(value: &T) -> RustTypes {
-    let mut result = RustTypes::NONE;
-    let type_t = TypeId::of::<T>();
-    if type_t == TypeId::of::<String>() {
-        result = RustTypes::STRING;
-    } else if type_t == TypeId::of::<bool>() {
-        result = RustTypes::BOOLEAN;
-    } else if type_t == TypeId::of::<u8>() {
-        result = RustTypes::U8;
-    }
-    result
-}
+    // Sequence types
+    TUPLE,
+    ARRAY,
+    SLICE,
 
-#[cfg(test)]
-mod test {
-    use std::any::TypeId;
+    // User-defined types
+    STRUCT,
+    ENUM,
+    UNION,
 
-    fn generic_any<T: 'static>() {
-        println!("type:{:?}", TypeId::of::<T>());
-        assert_eq!(TypeId::of::<T>(), TypeId::of::<String>())
-    }
+    // Function types
+    FUNCTIONS,
+    CLOSURES,
 
-    #[test]
-    fn any_check() {
-        // println!("type:{:?}", TypeId::of::<i8>());
-        // println!("type name:{:?}", std::any::type_name::<Option<String>>());
-        generic_any::<String>();
-    }
+    // Pointer types
+    REFERENCES,
+    RawPointers,
+    FunctionPointers,
+
+    // Trait types
+    TRAIT,
+    ImplTrait,
 }

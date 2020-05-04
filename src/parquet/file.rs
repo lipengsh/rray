@@ -1,6 +1,5 @@
 use crate::parquet::format::Format;
 use parquet::file::writer::{FileWriter, RowGroupWriter, SerializedFileWriter};
-use std::any::{Any, TypeId};
 use std::fs;
 use std::fs::File;
 use std::io;
