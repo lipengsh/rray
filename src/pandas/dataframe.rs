@@ -23,7 +23,6 @@ pub struct FloatDataframe<'a> {
     pub(crate) index: HashIndex,
 }
 
-
 impl<'a> FloatDataframe<'a> {
     /// only set index on string columns's name
     /// columns number <=2
@@ -109,7 +108,8 @@ impl<'a> fmt::Debug for FloatDataframe<'a> {
 }
 
 #[cfg(test)]
-mod test{
+mod test {
+    #[test]
     fn unique() {
         let mut v = vec![1, 3, 4, 1, 1, 2, -3, 2, 2];
         v.sort();
@@ -127,5 +127,3 @@ mod test{
         println!("n:{:?}", n);
     }
 }
-
-

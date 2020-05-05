@@ -1,5 +1,5 @@
 use crate::parquet::format::Format;
-use parquet::file::writer::{FileWriter, RowGroupWriter, SerializedFileWriter};
+use parquet::file::writer::{FileWriter, SerializedFileWriter};
 use std::fs;
 use std::fs::File;
 use std::io;
@@ -100,7 +100,6 @@ impl ParquetWriter {
 
 #[cfg(test)]
 mod test {
-    use std::any::TypeId;
 
     // macro_rules! make_dynamic_array {
     //     ($ty:ty, &array:expr) => {

@@ -8,30 +8,35 @@ pub struct Dynamic {
 }
 
 impl Dynamic {
-    pub fn new<T: 'static>(value: T) -> Self {
+    pub fn new<T>(value: T) -> Self
+    where
+        T: 'static,
+    {
         Dynamic {
-            type_name: rust_type(&value),
+            type_name: rust_type::<T>(),
             data: Box::new(value),
         }
     }
-}
 
-// native_rust_type(dynamic_data ,RustTypes::BOOLEAN)
-// return option,like Some(32), or None
-macro_rules! native_rust_type {
-    ($data:ident, $rray_type:ident, $native_type:ty) => {
-        if let Some(value) = $data.downcast_ref::<$native_type>() {
-            Some(value)
-        } else {
-            None
+    pub fn native<T: Clone>(&self) -> Result<T, &'static str>
+    where
+        T: 'static,
+    {
+        if rust_type::<T>() != self.type_name {
+            return Err("wrong type");
         }
-    };
+
+        let result = self.data.downcast_ref::<T>().unwrap() as &T;
+
+        Ok(result.clone())
+    }
 }
 
 impl fmt::Display for Dynamic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let data = &self.data;
         let type_name = self.type_name;
+
         match type_name {
             RustTypes::BOOLEAN => write!(
                 f,
@@ -51,13 +56,72 @@ impl fmt::Display for Dynamic {
                 self.type_name,
                 data.downcast_ref::<u8>().unwrap()
             ),
-            // todo , add more types
+            RustTypes::U16 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<u16>().unwrap()
+            ),
+            RustTypes::U32 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<u32>().unwrap()
+            ),
+            RustTypes::U64 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<u64>().unwrap()
+            ),
+            RustTypes::U128 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<u128>().unwrap()
+            ),
+            RustTypes::I8 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<i8>().unwrap()
+            ),
+            RustTypes::I16 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<i16>().unwrap()
+            ),
+            RustTypes::I32 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<i32>().unwrap()
+            ),
+            RustTypes::I64 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<i64>().unwrap()
+            ),
+            RustTypes::I128 => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<i128>().unwrap()
+            ),
+            RustTypes::CHAR => write!(
+                f,
+                "type:{:?}, data:{}",
+                self.type_name,
+                data.downcast_ref::<char>().unwrap()
+            ),
             _ => write!(f, "wrong types or not supported types"),
         }
     }
 }
 
-pub fn rust_type<T: 'static>(value: &T) -> RustTypes {
+pub fn rust_type<T: 'static>() -> RustTypes {
     let mut result = RustTypes::NONE;
     let type_t = TypeId::of::<T>();
     if type_t == TypeId::of::<String>() {
@@ -109,8 +173,8 @@ mod test {
         generic_any::<String>();
 
         // check rust_type function
-        let check_type: String = "hello".to_string();
-        let result = rust_type::<String>(&check_type);
+        let _check_type: String = "hello".to_string();
+        let result = rust_type::<String>();
         println!("types:{:?}", result);
 
         // check Dynamic
@@ -118,5 +182,8 @@ mod test {
 
         // print dynamic
         println!("result:: {}", result);
+
+        // print native
+        println!("native result:: {}", result.native::<String>().unwrap());
     }
 }
