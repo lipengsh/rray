@@ -160,6 +160,7 @@ pub fn rust_type<T: 'static>() -> RustTypes {
 #[cfg(test)]
 mod test {
     use crate::dynamic::dynamic::{rust_type, Dynamic};
+    use crate::dynamic::types::Types as RustTypes;
     use std::any::TypeId;
 
     fn generic_any<T: 'static>() {
@@ -185,5 +186,13 @@ mod test {
 
         // print native
         println!("native result:: {}", result.native::<String>().unwrap());
+
+        // print native from type name
+        if result.type_name == RustTypes::STRING {
+            println!(
+                "native type name result:: {}",
+                result.native::<String>().unwrap()
+            );
+        }
     }
 }
