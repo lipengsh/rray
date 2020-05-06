@@ -100,78 +100,61 @@ impl ParquetWriter {
 
 #[cfg(test)]
 mod test {
+    use crate::dynamic::dynamic::Dynamic;
+    use crate::pandas::utils::{gen_f32, gen_string};
+    use crate::parquet::file::FileHandler;
+    use crate::parquet::format::{ColumnSchema, Format};
+    use parquet::basic::Type;
 
-    // macro_rules! make_dynamic_array {
-    //     ($ty:ty, &array:expr) => {
-    //         $array
-    //             .iter()
-    //             .map(|x| {
-    //                 (
-    //                     TypeId::of::<DynamicArray<&ty>>(),
-    //                     Box::new(DynamicArray { value: x }),
-    //                 )
-    //             })
-    //             .collect()
-    //     };
-    // }
+    #[test]
+    fn write_parquet() {
+        // create file handler
+        let file_handler = FileHandler::new("sample.parquet");
 
-    // fn make_dynamic_array<T: 'static>(array: &'a Vec<T>, TypeResult: &'a mut Vec<TypeTuple>) {
-    //     for item in array {
-    //         TypeResult.push((TypeId::of::<DynamicArray<T>>(), Box::new(&item)));
-    //     }
-    // }
+        // create file format
+        let file_format = Format::new(
+            "sample",
+            vec![
+                ColumnSchema {
+                    name: "dim".to_string(),
+                    column_type: Type::BYTE_ARRAY,
+                },
+                ColumnSchema {
+                    name: "tag".to_string(),
+                    column_type: Type::BYTE_ARRAY,
+                },
+                ColumnSchema {
+                    name: "ptr".to_string(),
+                    column_type: Type::BOOLEAN,
+                },
+                ColumnSchema {
+                    name: "mkt".to_string(),
+                    column_type: Type::BOOLEAN,
+                },
+            ],
+        );
 
-    // #[test]
-    // fn write_parquet() {
-    //     // create file handler
-    //     let file_handler = FileHandler::new("sample.parquet");
-    //
-    //     // create file format
-    //     let file_format = Format::new(
-    //         "sample",
-    //         vec![
-    //             ColumnSchema {
-    //                 name: "dim".to_string(),
-    //                 column_type: Type::BYTE_ARRAY,
-    //             },
-    //             ColumnSchema {
-    //                 name: "tag".to_string(),
-    //                 column_type: Type::BYTE_ARRAY,
-    //             },
-    //             ColumnSchema {
-    //                 name: "ptr".to_string(),
-    //                 column_type: Type::BOOLEAN,
-    //             },
-    //             ColumnSchema {
-    //                 name: "mkt".to_string(),
-    //                 column_type: Type::BOOLEAN,
-    //             },
-    //         ],
-    //     );
-    //
-    //     // generate sample data
-    //     const ARRAY_LEN: usize = 1024;
-    //
-    //     let dim_array: Vec<String> = gen_string(ARRAY_LEN);
-    //     let tag_array: Vec<String> = gen_string(ARRAY_LEN);
-    //     let ptr_array: Vec<f32> = gen_f32(ARRAY_LEN);
-    //     let mkt_array: Vec<f32> = gen_f32(ARRAY_LEN);
-    //
-    //     let mut dim_dynamic: Vec<TypeTuple> = Vec::new();
-    //     make_dynamic_array::<String>(dim_array, &mut dim_dynamic);
-    //     let mut tag_dynamic: Vec<TypeTuple> = Vec::new();
-    //     make_dynamic_array::<String>(tag_array, &mut tag_dynamic);
-    //     let mut ptr_dynamic: Vec<TypeTuple> = Vec::new();
-    //     make_dynamic_array::<f32>(ptr_array, &mut ptr_dynamic);
-    //     let mut mkt_dynamic: Vec<TypeTuple> = Vec::new();
-    //     make_dynamic_array::<f32>(mkt_array, &mut mkt_dynamic);
-    //
-    //     let mut array_gather: Vec<Vec<TypeTuple>> = Vec::new();
-    //     array_gather.push(dim_dynamic);
-    //     array_gather.push(tag_dynamic);
-    //     array_gather.push(ptr_dynamic);
-    //     array_gather.push(mkt_dynamic);
-    //
-    //     // ParquetWriter::new(file_handler, file_format).writer_parquet(&array_gather);
-    // }
+        // generate sample data
+        const ARRAY_LEN: usize = 1024;
+
+        let dim_array: Vec<String> = gen_string(ARRAY_LEN);
+        let tag_array: Vec<String> = gen_string(ARRAY_LEN);
+        let ptr_array: Vec<f32> = gen_f32(ARRAY_LEN);
+        let mkt_array: Vec<f32> = gen_f32(ARRAY_LEN);
+        //
+        // let dim_dynamic = make_dynamic_array::<String>(&dim_array);
+        // let tag_dynamic = make_dynamic_array::<String>(&tag_array);
+        // let ptr_dynamic = make_dynamic_array::<f32>(&ptr_array);
+        // let mkt_dynamic = make_dynamic_array::<f32>(&mkt_array);
+
+        // ParquetWriter::new(file_handler, file_format).writer_parquet(&array_gather);
+    }
+
+    fn make_dynamic_array<T>(array: &'static Vec<T>) -> Vec<Dynamic> {
+        let mut result = Vec::new();
+        for x in array {
+            result.push(Dynamic::new(x.clone()));
+        }
+        result
+    }
 }
