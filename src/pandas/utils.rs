@@ -1,9 +1,8 @@
+use arrow::array::Float32Array;
 use rand::distributions::Alphanumeric;
 use rand::thread_rng;
 use rand::Rng;
-use arrow::array::Float32Array;
 
-#[allow(dead_code)]
 pub fn gen_string(size: usize) -> Vec<String> {
     let mut rand_string: Vec<String> = Vec::new();
     for _i in 0..size {
@@ -17,7 +16,6 @@ pub fn gen_string(size: usize) -> Vec<String> {
     rand_string
 }
 
-#[allow(dead_code)]
 pub fn gen_u32(size: usize) -> Vec<u32> {
     // random u32 array
     let mut rand_array = vec![0u32; size];
@@ -28,7 +26,6 @@ pub fn gen_u32(size: usize) -> Vec<u32> {
     rand_array
 }
 
-#[allow(dead_code)]
 pub fn gen_f32(size: usize) -> Vec<f32> {
     let mut rand_array: Vec<f32> = vec![0f32; size];
     let mut rng = thread_rng();
@@ -38,9 +35,8 @@ pub fn gen_f32(size: usize) -> Vec<f32> {
     rand_array
 }
 
-
 #[allow(dead_code)]
-fn print_fdata(float_data: Vec<Float32Array>) {
+pub fn print_fdata(float_data: Vec<Float32Array>) {
     for i in 0..float_data.len() {
         println!("{:?}", float_data[i]);
     }

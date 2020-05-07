@@ -1,10 +1,15 @@
-use crate::parquet::format::Format;
-use parquet::file::writer::{FileWriter, SerializedFileWriter};
-use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::Write;
 use std::path;
+use std::{fs, mem};
+
+use parquet::column::writer::ColumnWriter::FloatColumnWriter;
+use parquet::column::writer::{get_typed_column_writer_mut, ColumnWriter, ColumnWriterImpl};
+use parquet::file::writer::{FileWriter, SerializedFileWriter};
+
+use crate::dynamic::dynamic::Dynamic;
+use crate::parquet::format::Format;
 
 /// parquet io struct and impl
 pub struct FileHandler {
@@ -56,41 +61,19 @@ impl ParquetWriter {
     }
 
     /// write parquet
-    // pub fn write_parquet(&mut self, data: &Vec<Vec<TypeTuple>>) {
-    //     let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
-    //     for item in data {
-    //         if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-    //             // get_typed_column_writer_mut::<dyn >(&mut col_writer)
-    //             //     .write_batch(item, None, None)
-    //             //     .unwrap();
-    //             println!("next column");
-    //             row_group_writer.close_column(col_writer).unwrap();
-    //         }
-    //     }
-    //     self.writer_handler
-    //         .close_row_group(row_group_writer)
-    //         .unwrap();
-    //
-    //     // if let Some(s) = value.downcast_ref::<typeid>() {
-    //     //     //Somehow downcast using typeid instead of type
-    //     //     println!("{:?}", s);
-    //     // }
-    // }
+    pub fn write_parquet(&mut self, data: &Vec<Vec<Dynamic>>) {
+        let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
+        for item in data {
+            if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
+                // todo howto contruect datatype
 
-    // // // write parquet
-    // pub fn write_parquet(&mut self, data: &Vec<Vec<dyn DataType>>) {
-    //     let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
-    //
-    //     for item in &data {
-    //         if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-    //             get_typed_column_writer_mut::<dyn DataType>(&mut col_writer)
-    //                 .write_batch(item, None, None)
-    //                 .unwrap();
-    //         }
-    //         row_group_writer.close_column().unwrap();
-    //     }
-    //     self.writer_handler.close_row_group().unwrap();
-    // }
+                row_group_writer.close_column(col_writer).unwrap();
+            }
+        }
+        self.writer_handler
+            .close_row_group(row_group_writer)
+            .unwrap();
+    }
 
     // close writer
     pub fn close(&mut self) {
@@ -100,11 +83,12 @@ impl ParquetWriter {
 
 #[cfg(test)]
 mod test {
+    use parquet::basic::Type;
+
     use crate::dynamic::dynamic::Dynamic;
     use crate::pandas::utils::{gen_f32, gen_string};
-    use crate::parquet::file::FileHandler;
+    use crate::parquet::file::{FileHandler, ParquetWriter};
     use crate::parquet::format::{ColumnSchema, Format};
-    use parquet::basic::Type;
 
     #[test]
     fn write_parquet() {
@@ -142,18 +126,23 @@ mod test {
         let ptr_array: Vec<f32> = gen_f32(ARRAY_LEN);
         let mkt_array: Vec<f32> = gen_f32(ARRAY_LEN);
         //
-        // let dim_dynamic = make_dynamic_array::<String>(&dim_array);
-        // let tag_dynamic = make_dynamic_array::<String>(&tag_array);
-        // let ptr_dynamic = make_dynamic_array::<f32>(&ptr_array);
-        // let mkt_dynamic = make_dynamic_array::<f32>(&mkt_array);
+        let dim_dynamic = make_dynamic_array::<String>(dim_array);
+        let tag_dynamic = make_dynamic_array::<String>(tag_array);
+        let ptr_dynamic = make_dynamic_array::<f32>(ptr_array);
+        let mkt_dynamic = make_dynamic_array::<f32>(mkt_array);
 
-        // ParquetWriter::new(file_handler, file_format).writer_parquet(&array_gather);
+        println!("dim dynamic:{}", dim_dynamic[0].native::<String>().unwrap());
+        println!("mkt dynamic:{}", mkt_dynamic[0].native::<f32>().unwrap());
+
+        let all_array = vec![dim_dynamic, tag_dynamic, ptr_dynamic, mkt_dynamic];
+
+        ParquetWriter::new(file_handler, file_format).write_parquet(&all_array);
     }
 
-    fn make_dynamic_array<T>(array: &'static Vec<T>) -> Vec<Dynamic> {
+    fn make_dynamic_array<T: 'static>(array: Vec<T>) -> Vec<Dynamic> {
         let mut result = Vec::new();
         for x in array {
-            result.push(Dynamic::new(x.clone()));
+            result.push(Dynamic::new(x));
         }
         result
     }
