@@ -10,6 +10,8 @@ use parquet::file::writer::{FileWriter, SerializedFileWriter};
 
 use crate::dynamic::dynamic::Dynamic;
 use crate::parquet::format::Format;
+use parquet::data_type::DataType;
+use std::any::Any;
 
 /// parquet io struct and impl
 pub struct FileHandler {
@@ -65,8 +67,15 @@ impl ParquetWriter {
         let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
         for item in data {
             if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-                // todo howto contruect datatype
-
+                match col_writer {
+                    ColumnWriter::BoolColumnWriter(ref mut r) => {
+                        r.write_batch(&[true, false], None, None).unwrap();
+                    }
+                    ColumnWriter::Int32ColumnWriter(ref mut r) => {
+                        r.write_batch(&[1, 2], None, None).unwrap();
+                    }
+                    _ => (),
+                }
                 row_group_writer.close_column(col_writer).unwrap();
             }
         }
