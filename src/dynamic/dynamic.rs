@@ -30,6 +30,10 @@ impl Dynamic {
 
         Ok(result.clone())
     }
+
+    pub fn type_name(&self) -> RustTypes {
+        self.type_name
+    }
 }
 
 impl fmt::Display for Dynamic {

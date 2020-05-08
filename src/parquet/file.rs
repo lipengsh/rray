@@ -5,12 +5,20 @@ use std::path;
 use std::{fs, mem};
 
 use parquet::column::writer::ColumnWriter::FloatColumnWriter;
-use parquet::column::writer::{get_typed_column_writer_mut, ColumnWriter, ColumnWriterImpl};
+use parquet::column::writer::{
+    get_typed_column_writer, get_typed_column_writer_mut, ColumnWriter, ColumnWriterImpl,
+};
 use parquet::file::writer::{FileWriter, SerializedFileWriter};
 
 use crate::dynamic::dynamic::Dynamic;
+use crate::dynamic::types::Types;
 use crate::parquet::format::Format;
+use arrow::array::BooleanArray;
 use parquet::data_type::DataType;
+use parquet::data_type::Decimal::Int64;
+use parquet::data_type::{
+    BoolType, ByteArrayType, DoubleType, FloatType, Int32Type, Int64Type, Int96Type,
+};
 use std::any::Any;
 
 /// parquet io struct and impl
@@ -67,18 +75,22 @@ impl ParquetWriter {
         let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
         for item in data {
             if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-                match col_writer {
-                    ColumnWriter::BoolColumnWriter(ref mut r) => {
-                        r.write_batch(&[true, false], None, None).unwrap();
-                    }
-                    ColumnWriter::Int32ColumnWriter(ref mut r) => {
-                        r.write_batch(&[1, 2], None, None).unwrap();
-                    }
-                    _ => (),
-                }
-                row_group_writer.close_column(col_writer).unwrap();
+                // get dynamic type
+                // match item[0].type_name() {
+                //     Types::BOOLEAN => {
+                //         let native_array =
+                //             item.iter().map(|x| x.native::<bool>().unwrap()).collect();
+                //         get_typed_column_writer::<BoolType>(col_writer)
+                //             .write_batch(&native_array, None, None)
+                //             .unwrap();
+                //     }
+                //     _ => (),
+                // }
+                let _a = 0;
+                // row_group_writer.close_column(col_writer).unwrap();
             }
         }
+
         self.writer_handler
             .close_row_group(row_group_writer)
             .unwrap();

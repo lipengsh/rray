@@ -15,6 +15,10 @@ pub enum Types {
     I64,
     I128,
 
+    // Float
+    F32,
+    F64,
+
     // Textual
     CHAR,
     STRING,
