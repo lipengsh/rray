@@ -129,8 +129,6 @@ pub fn rust_type<T: 'static>() -> RustTypes {
     let mut result = RustTypes::NONE;
     let type_t = TypeId::of::<T>();
 
-    let str_str = TypeId::of::<String>();
-    let str_u8 = TypeId::of::<u8>();
     if type_t == TypeId::of::<String>() {
         result = RustTypes::STRING;
     } else if type_t == TypeId::of::<bool>() {
