@@ -1,22 +1,13 @@
+use crate::dynamic::dynamic::Dynamic;
+use crate::parquet::format::Format;
+use parquet::column::writer::ColumnWriter;
+use parquet::data_type::ByteArray;
+use parquet::file::writer::{FileWriter, SerializedFileWriter};
+use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::Write;
 use std::path;
-use std::{fs, mem};
-
-use parquet::column::writer::ColumnWriter;
-use parquet::column::writer::ColumnWriter::FloatColumnWriter;
-use parquet::file::writer::{FileWriter, SerializedFileWriter};
-
-use crate::dynamic::dynamic::Dynamic;
-use crate::dynamic::types::Types;
-use crate::parquet::format::Format;
-use arrow::array::BooleanArray;
-use parquet::data_type::DataType;
-use parquet::data_type::Decimal::Int64;
-use parquet::data_type::{
-    BoolType, ByteArrayType, DoubleType, FloatType, Int32Type, Int64Type, Int96Type,
-};
 
 /// parquet io struct and impl
 pub struct FileHandler {
@@ -50,6 +41,19 @@ impl FileHandler {
     }
 }
 
+/// write_column(BoolColumnWriter , bool, typed_writer)
+macro_rules! write_column {
+    ($column_type:ty, $writer:ident, $item:ident) => {
+        let mut native_array: Vec<$column_type> = Vec::new();
+        for x in $item {
+            native_array.push(x.native::<$column_type>().unwrap());
+        }
+        $writer
+            .write_batch(native_array.as_slice(), None, None)
+            .unwrap();
+    };
+}
+
 /// parquet writer
 pub struct ParquetWriter {
     writer_handler: SerializedFileWriter<File>,
@@ -75,15 +79,83 @@ impl ParquetWriter {
                 // get dynamic type
                 match col_writer {
                     ColumnWriter::BoolColumnWriter(ref mut typed_writer) => {
-                        let mut native_array: Vec<bool> = Vec::new();
+                        write_column!(bool, typed_writer, item);
+                        // let mut native_array: Vec<bool> = Vec::new();
+                        // for x in item {
+                        //     native_array.push(x.native::<bool>().unwrap());
+                        // }
+                        //
+                        // typed_writer.write_batch(&native_array, None, None).unwrap();
+                    }
+
+                    ColumnWriter::Int32ColumnWriter(ref mut typed_writer) => {
+                        write_column!(i32, typed_writer, item);
+                        // let mut native_array: Vec<i32> = Vec::new();
+                        // for x in item {
+                        //     native_array.push(x.native::<i32>().unwrap());
+                        // }
+                        //
+                        // typed_writer.write_batch(&native_array, None, None).unwrap();
+                    }
+
+                    ColumnWriter::Int64ColumnWriter(ref mut typed_writer) => {
+                        write_column!(i64, typed_writer, item);
+                        // let mut native_array: Vec<i64> = Vec::new();
+                        // for x in item {
+                        //     native_array.push(x.native::<i64>().unwrap());
+                        // }
+                        //
+                        // typed_writer
+                        //     .write_batch(native_array.as_slice(), None, None)
+                        //     .unwrap();
+                    }
+
+                    ColumnWriter::Int96ColumnWriter(ref mut _typed_writer) => {
+                        // todo add int96 in dynamics
+                        ()
+                    }
+
+                    ColumnWriter::FloatColumnWriter(ref mut typed_writer) => {
+                        write_column!(f32, typed_writer, item);
+                        // let mut native_array: Vec<f32> = Vec::new();
+                        // for x in item {
+                        //     native_array.push(x.native::<f32>().unwrap());
+                        // }
+                        //
+                        // typed_writer.write_batch(&native_array, None, None).unwrap();
+                    }
+
+                    ColumnWriter::DoubleColumnWriter(ref mut typed_writer) => {
+                        write_column!(f64, typed_writer, item);
+                        // let mut native_array: Vec<f64> = Vec::new();
+                        // for x in item {
+                        //     native_array.push(x.native::<f64>().unwrap());
+                        // }
+                        //
+                        // typed_writer.write_batch(&native_array, None, None).unwrap();
+                    }
+
+                    ColumnWriter::ByteArrayColumnWriter(ref mut typed_writer) => {
+                        // write_column!(String, typed_writer, item);
+                        let mut native_array: Vec<ByteArray> = Vec::new();
                         for x in item {
-                            native_array.push(x.native::<bool>().unwrap());
+                            native_array
+                                .push(ByteArray::from(x.native::<String>().unwrap().as_str()));
                         }
 
                         typed_writer.write_batch(&native_array, None, None).unwrap();
                     }
-                    // todo add more types
-                    _ => {}
+
+                    ColumnWriter::FixedLenByteArrayColumnWriter(ref mut typed_writer) => {
+                        // write_column!(String, typed_writer, item);
+                        let mut native_array: Vec<ByteArray> = Vec::new();
+                        for x in item {
+                            native_array
+                                .push(ByteArray::from(x.native::<String>().unwrap().as_str()));
+                        }
+                        typed_writer.write_batch(&native_array, None, None).unwrap();
+                        typed_writer.write_batch(&native_array, None, None).unwrap();
+                    }
                 };
                 row_group_writer.close_column(col_writer).unwrap();
             }
