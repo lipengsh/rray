@@ -23,7 +23,9 @@ impl Dynamic {
         T: 'static,
     {
         if rust_type::<T>() != self.type_name {
-            return Err("wrong type");
+            println!("rust type:{:?}", rust_type::<T>());
+            println!("self type name:{:?}", self.type_name);
+            return Err("wrong type at 26");
         }
 
         let result = self.data.downcast_ref::<T>().unwrap() as &T;
@@ -126,40 +128,41 @@ impl fmt::Display for Dynamic {
 }
 
 pub fn rust_type<T: 'static>() -> RustTypes {
-    let mut result = RustTypes::NONE;
     let type_t = TypeId::of::<T>();
 
     if type_t == TypeId::of::<String>() {
-        result = RustTypes::STRING;
+        return RustTypes::STRING;
     } else if type_t == TypeId::of::<bool>() {
-        result = RustTypes::BOOLEAN;
+        return RustTypes::BOOLEAN;
     } else if type_t == TypeId::of::<u8>() {
-        result = RustTypes::U8;
+        return RustTypes::U8;
     } else if type_t == TypeId::of::<u16>() {
-        result = RustTypes::U16;
+        return RustTypes::U16;
     } else if type_t == TypeId::of::<u32>() {
-        result = RustTypes::U32;
+        return RustTypes::U32;
     } else if type_t == TypeId::of::<u64>() {
-        result = RustTypes::U64;
+        return RustTypes::U64;
     } else if type_t == TypeId::of::<u128>() {
-        result = RustTypes::U128;
+        return RustTypes::U128;
     } else if type_t == TypeId::of::<i8>() {
-        result = RustTypes::I8;
+        return RustTypes::I8;
     } else if type_t == TypeId::of::<i16>() {
-        result = RustTypes::I16;
+        return RustTypes::I16;
     } else if type_t == TypeId::of::<i32>() {
-        result = RustTypes::I32;
+        return RustTypes::I32;
     } else if type_t == TypeId::of::<i64>() {
-        result = RustTypes::I64;
+        return RustTypes::I64;
     } else if type_t == TypeId::of::<i128>() {
-        result = RustTypes::I128;
+        return RustTypes::I128;
+    } else if type_t == TypeId::of::<f32>() {
+        return RustTypes::F32;
+    } else if type_t == TypeId::of::<f64>() {
+        return RustTypes::F64;
     } else if type_t == TypeId::of::<char>() {
-        result = RustTypes::CHAR;
-    } else if type_t == TypeId::of::<String>() {
-        result = RustTypes::STRING;
+        return RustTypes::CHAR;
+    } else {
+        return RustTypes::NONE;
     }
-    // not all types , no Sequence, user-defined,function,pointer,trait
-    result
 }
 
 #[cfg(test)]

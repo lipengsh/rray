@@ -8,6 +8,8 @@ use std::fs::File;
 use std::io;
 use std::io::Write;
 use std::path;
+use std::path::PathBuf;
+use std::str::FromStr;
 
 /// parquet io struct and impl
 pub struct FileHandler {
@@ -30,6 +32,15 @@ impl FileHandler {
             .open(path::PathBuf::from(file_with_path))
             .unwrap();
 
+        Self {
+            file_with_path: file_with_path.to_string(),
+            file_handler,
+        }
+    }
+
+    pub fn open(file_with_path: &str) -> Self {
+        let file_handler =
+            fs::File::open(PathBuf::from_str(file_with_path).unwrap().as_path()).unwrap();
         Self {
             file_with_path: file_with_path.to_string(),
             file_handler,
@@ -71,8 +82,9 @@ impl ParquetWriter {
         }
     }
 
-    /// write parquet
+    // write parquet
     pub fn write_parquet(&mut self, data: &Vec<Vec<Dynamic>>) {
+        // only one row group
         let mut row_group_writer = self.writer_handler.next_row_group().unwrap();
         for item in data {
             if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
@@ -80,59 +92,28 @@ impl ParquetWriter {
                 match col_writer {
                     ColumnWriter::BoolColumnWriter(ref mut typed_writer) => {
                         write_column!(bool, typed_writer, item);
-                        // let mut native_array: Vec<bool> = Vec::new();
-                        // for x in item {
-                        //     native_array.push(x.native::<bool>().unwrap());
-                        // }
-                        //
-                        // typed_writer.write_batch(&native_array, None, None).unwrap();
                     }
 
                     ColumnWriter::Int32ColumnWriter(ref mut typed_writer) => {
                         write_column!(i32, typed_writer, item);
-                        // let mut native_array: Vec<i32> = Vec::new();
-                        // for x in item {
-                        //     native_array.push(x.native::<i32>().unwrap());
-                        // }
-                        //
-                        // typed_writer.write_batch(&native_array, None, None).unwrap();
                     }
 
                     ColumnWriter::Int64ColumnWriter(ref mut typed_writer) => {
                         write_column!(i64, typed_writer, item);
-                        // let mut native_array: Vec<i64> = Vec::new();
-                        // for x in item {
-                        //     native_array.push(x.native::<i64>().unwrap());
-                        // }
-                        //
-                        // typed_writer
-                        //     .write_batch(native_array.as_slice(), None, None)
-                        //     .unwrap();
                     }
 
                     ColumnWriter::Int96ColumnWriter(ref mut _typed_writer) => {
-                        // todo add int96 in dynamics
+                        // write_column!(i128, _typed_writer, item);
                         ()
+                        // TODO: add support for Int96
                     }
 
                     ColumnWriter::FloatColumnWriter(ref mut typed_writer) => {
                         write_column!(f32, typed_writer, item);
-                        // let mut native_array: Vec<f32> = Vec::new();
-                        // for x in item {
-                        //     native_array.push(x.native::<f32>().unwrap());
-                        // }
-                        //
-                        // typed_writer.write_batch(&native_array, None, None).unwrap();
                     }
 
                     ColumnWriter::DoubleColumnWriter(ref mut typed_writer) => {
                         write_column!(f64, typed_writer, item);
-                        // let mut native_array: Vec<f64> = Vec::new();
-                        // for x in item {
-                        //     native_array.push(x.native::<f64>().unwrap());
-                        // }
-                        //
-                        // typed_writer.write_batch(&native_array, None, None).unwrap();
                     }
 
                     ColumnWriter::ByteArrayColumnWriter(ref mut typed_writer) => {
@@ -164,6 +145,8 @@ impl ParquetWriter {
         self.writer_handler
             .close_row_group(row_group_writer)
             .unwrap();
+
+        self.writer_handler.close().unwrap();
     }
 
     // close writer
@@ -180,11 +163,13 @@ mod test {
     use crate::pandas::utils::{gen_f32, gen_string};
     use crate::parquet::file::{FileHandler, ParquetWriter};
     use crate::parquet::format::{ColumnSchema, Format};
+    use parquet::file::reader::SerializedFileReader;
+    use std::convert::TryFrom;
 
     #[test]
     fn write_parquet() {
         // create file handler
-        let file_handler = FileHandler::new("sample.parquet");
+        let file_handler = FileHandler::new("./target/sample.parquet");
 
         // create file format
         let file_format = Format::new(
@@ -200,11 +185,11 @@ mod test {
                 },
                 ColumnSchema {
                     name: "ptr".to_string(),
-                    column_type: Type::BOOLEAN,
+                    column_type: Type::FLOAT,
                 },
                 ColumnSchema {
                     name: "mkt".to_string(),
-                    column_type: Type::BOOLEAN,
+                    column_type: Type::FLOAT,
                 },
             ],
         );
@@ -230,10 +215,18 @@ mod test {
         ParquetWriter::new(file_handler, file_format).write_parquet(&all_array);
     }
 
+    #[test]
+    fn read_parquet() {
+        let file_handler = FileHandler::open("sample.parquet").try_clone().unwrap();
+        // let read_result = SerializedFileReader::new(file_handler);
+        let read_result = SerializedFileReader::try_from(file_handler);
+        assert!(read_result.is_ok());
+    }
+
     fn make_dynamic_array<T: 'static>(array: Vec<T>) -> Vec<Dynamic> {
         let mut result = Vec::new();
         for x in array {
-            result.push(Dynamic::new(x));
+            result.push(Dynamic::new::<T>(x));
         }
         result
     }

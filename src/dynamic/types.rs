@@ -48,3 +48,27 @@ pub enum Types {
     TRAIT,
     ImplTrait,
 }
+
+#[cfg(test)]
+mod test {
+    use crate::dynamic::types::Types;
+
+    #[derive(Debug)]
+    enum IpAddrKind {
+        V4,
+        V6,
+    }
+
+    #[test]
+    fn ip() {
+        let four = IpAddrKind::V4;
+        let six = IpAddrKind::V6;
+        let seven = Types::F32;
+        let eight = Types::CHAR;
+
+        println!("{:?}", four);
+        println!("{:?}", six);
+        println!("{:?}", seven);
+        println!("{:?}", eight);
+    }
+}
